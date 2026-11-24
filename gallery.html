@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{background:#1a1c3a;margin:0;color:#fff;font:12px sans-serif}canvas{display:block}</style></head><body><canvas id="c"></canvas>
+<script type="module">
+import { LEVELS } from './js/themes.js';
+import { drawCharacter } from './js/sprites.js';
+import { drawProp, drawLoot, drawVehicle, drawIcon } from './js/art-things.js';
+import { ITEMS } from './js/store.js';
+const mode = new URLSearchParams(location.search).get('m') || 'heads';
+const c = document.getElementById('c'); const x = c.getContext('2d');
+const S = new Set(); const list = [];
+const add = (e, extra) => { if (!S.has(e + (extra||''))) { S.add(e + (extra||'')); list.push([e, extra]); } };
+if (mode === 'heads') LEVELS.forEach(t => { add(t.h[0], t.h[2] + '|' + (t.h[3]||'')); t.g.forEach(g => add(g[0], g[2] + '|' + (g[3]||''))); if (t.k) add(t.k[0], '#6a5040|hound'); });
+if (mode === 'props') LEVELS.forEach(t => { t.p.forEach(p => add(p)); add(t.hs[0]); });
+if (mode === 'loot') LEVELS.forEach(t => t.l[0].forEach(p => add(p)));
+if (mode === 'veh') LEVELS.forEach(t => add(t.x[0]));
+if (mode === 'icons') Object.keys(ITEMS).forEach(k => add(k));
+const cell = mode === 'heads' ? 76 : 70, cols = Math.floor(innerWidth / cell);
+c.width = innerWidth; c.height = Math.ceil(list.length / cols) * cell + 20;
+let t = 0;
+function draw() {
+  t += 0.016; x.clearRect(0, 0, c.width, c.height);
+  list.forEach(([e, extra], i) => {
+    const cx = (i % cols) * cell + cell / 2, cy = Math.floor(i / cols) * cell + cell / 2 + 6;
+    x.fillStyle = i % 2 ? '#24264a' : '#2a2c52'; x.fillRect(cx - cell / 2, cy - cell / 2 - 6, cell, cell);
+    if (mode === 'heads') { const [col, hat] = extra.split('|'); drawCharacter(x, { x: cx, y: cy + 8, ang: 0.4, walk: t * 6, body: col, head: e, hat: hat === 'hound' ? '' : hat, hound: hat === 'hound', guard: hat !== 'hound', size: 1.25, t }); }
+    else if (mode === 'props') drawProp(x, e, cx, cy, 56, t, i);
+    else if (mode === 'loot') drawLoot(x, e, cx, cy, 56, t);
+    else if (mode === 'veh') drawVehicle(x, e, cx, cy, 60, t);
+    else drawIcon(x, e, cx, cy, 50, t);
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+</script></body></html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+<style>body{background:#222;margin:0;display:flex;flex-wrap:wrap;gap:10px;padding:10px}canvas{max-width:48vw;height:auto;border:1px solid #444}</style></head>
+<body><canvas id="icon" width="1024" height="1024"></canvas><canvas id="thumb" width="1200" height="630"></canvas>
+<script type="module">
+import { drawHead } from '../js/art-chars.js';
+import { drawCharacter, drawHat, drawCoin } from '../js/sprites.js';
+import { drawLoot } from '../js/art-things.js';
+
+await document.fonts.load('100px "Lilita One"');
+await document.fonts.load('900 40px Nunito');
+
+function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect(x, y, w, h, r); }
+function sparkle(c, x, y, s, a = 1) { c.save(); c.globalAlpha = a; c.fillStyle = '#fff8d0'; c.translate(x, y); c.beginPath(); for (let k = 0; k < 8; k++) { const an = k * Math.PI / 4, r = k % 2 ? s * 0.13 : s * 0.5; c.lineTo(Math.cos(an) * r, Math.sin(an) * r); } c.fill(); c.restore(); }
+function beam(c, x, y, ang, len, spread, col) {
+  c.save(); c.globalCompositeOperation = 'lighter';
+  const g = c.createRadialGradient(x, y, 0, x, y, len); g.addColorStop(0, col.replace('A', '0.55')); g.addColorStop(1, col.replace('A', '0'));
+  c.fillStyle = g; c.beginPath(); c.moveTo(x, y); c.arc(x, y, len, ang - spread, ang + spread); c.closePath(); c.fill(); c.restore();
+}
+
+// ---------------- ICON
+{
+  const cv = document.getElementById('icon'), c = cv.getContext('2d'), S = 1024;
+  const bg = c.createLinearGradient(0, 0, 0, S); bg.addColorStop(0, '#1a1450'); bg.addColorStop(0.6, '#2a1a5e'); bg.addColorStop(1, '#4a1d5a');
+  rr(c, 0, 0, S, S, 220); c.fillStyle = bg; c.fill();
+  c.save(); rr(c, 0, 0, S, S, 220); c.clip();
+  // stars
+  for (let i = 0; i < 70; i++) { c.fillStyle = `rgba(255,255,255,${0.2 + Math.random() * 0.6})`; const x = Math.random() * S, y = Math.random() * S * 0.6; c.fillRect(x, y, 3, 3); }
+  // moon
+  const mg = c.createRadialGradient(780, 230, 20, 780, 230, 330); mg.addColorStop(0, 'rgba(255,240,190,.5)'); mg.addColorStop(1, 'rgba(255,240,190,0)'); c.fillStyle = mg; c.fillRect(0, 0, S, S);
+  c.fillStyle = '#fff1c8'; c.beginPath(); c.arc(780, 230, 105, 0, 7); c.fill();
+  c.fillStyle = 'rgba(200,170,120,.35)'; [[750, 200, 22], [815, 260, 16], [800, 180, 10]].forEach(([x, y, r]) => { c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); });
+  // searchlight beam
+  beam(c, 120, 1024, -1.05, 1200, 0.16, 'rgba(255,236,170,A)');
+  // skyline
+  c.fillStyle = '#120e30';
+  let x = -20; const hs = [260, 340, 220, 300, 380, 250, 320, 230];
+  hs.forEach((h, i) => { const w = 150; c.fillRect(x, S - h, w, h); for (let wy = S - h + 26; wy < S - 20; wy += 40) for (let wx = x + 20; wx < x + w - 20; wx += 36) if (Math.random() < 0.4) { c.fillStyle = 'rgba(255,214,120,.55)'; c.fillRect(wx, wy, 14, 18); c.fillStyle = '#120e30'; } x += w - 10; });
+  // glow behind raccoon
+  const rg = c.createRadialGradient(512, 520, 50, 512, 520, 420); rg.addColorStop(0, 'rgba(255,200,90,.35)'); rg.addColorStop(1, 'rgba(255,200,90,0)'); c.fillStyle = rg; c.fillRect(0, 0, S, S);
+  // raccoon head with fedora
+  c.save(); c.shadowColor = 'rgba(0,0,0,.6)'; c.shadowBlur = 40; c.shadowOffsetY = 18;
+  drawHead(c, '🦝', 512, 560, 610, { t: 1.3, lx: 0.25, ly: 0.15 });
+  c.restore();
+  drawHat(c, 'fedora', 512, 560, 610 * 0.84, 0);
+  // loot
+  c.save(); c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = 24;
+  drawLoot(c, '💰', 820, 840, 300, 1.6);
+  drawLoot(c, '💎', 200, 860, 220, 1.6);
+  c.restore();
+  sparkle(c, 300, 300, 70, 0.9); sparkle(c, 880, 600, 50, 0.8); sparkle(c, 150, 640, 40, 0.7);
+  c.restore();
+  // rim
+  rr(c, 8, 8, S - 16, S - 16, 214); c.lineWidth = 16; c.strokeStyle = 'rgba(255,214,90,.55)'; c.stroke();
+}
+
+// ---------------- THUMBNAIL (1200x630)
+{
+  const cv = document.getElementById('thumb'), c = cv.getContext('2d'), W = 1200, H = 630;
+  const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#0d0b2a'); bg.addColorStop(0.65, '#231a5a'); bg.addColorStop(1, '#3d1d58'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+  for (let i = 0; i < 120; i++) { c.fillStyle = `rgba(255,255,255,${0.2 + Math.random() * 0.6})`; c.fillRect(Math.random() * W, Math.random() * H * 0.6, 2, 2); }
+  const mg = c.createRadialGradient(1060, 110, 10, 1060, 110, 220); mg.addColorStop(0, 'rgba(255,240,190,.45)'); mg.addColorStop(1, 'rgba(255,240,190,0)'); c.fillStyle = mg; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#fff1c8'; c.beginPath(); c.arc(1060, 110, 58, 0, 7); c.fill();
+  // skyline
+  let x = -10; c.fillStyle = '#100c2a';
+  while (x < W) { const w = 70 + Math.random() * 70, h = 90 + Math.random() * 150; c.fillRect(x, H - h, w, h); for (let wy = H - h + 14; wy < H - 10; wy += 22) for (let wx = x + 10; wx < x + w - 10; wx += 18) if (Math.random() < 0.35) { c.fillStyle = 'rgba(255,214,120,.5)'; c.fillRect(wx, wy, 8, 10); c.fillStyle = '#100c2a'; } x += w + 4; }
+  // guards with flashlight beams converging
+  const guards = [['👮', '#22375e', '', 690, 545, -0.6], ['🧝', '#1f8a3a', '', 1120, 300, 2.8], ['🐺', '#1d1d24', 'nemes', 1080, 560, 3.5], ['🧔', '#8b5a2b', 'cowboy', 720, 230, 0.5]];
+  for (const [e, col, hat, gx, gy, ang] of guards) beam(c, gx, gy, ang, 330, 0.3, 'rgba(255,236,170,A)');
+  for (const [e, col, hat, gx, gy, ang] of guards) drawCharacter(c, { x: gx, y: gy, ang, walk: 0, body: col, head: e, hat, guard: true, size: 2.0, t: 0.7, light: '#fff1c0' });
+  // hero raccoon, sneaking with sack
+  const hg = c.createRadialGradient(900, 400, 20, 900, 400, 200); hg.addColorStop(0, 'rgba(255,210,100,.35)'); hg.addColorStop(1, 'rgba(255,210,100,0)'); c.fillStyle = hg; c.fillRect(0, 0, W, H);
+  drawCharacter(c, { x: 900, y: 410, ang: 3.4, walk: 0.8, body: '#5d6270', head: '🦝', hat: 'fedora', size: 3.6, sack: 5, t: 1.3, crouch: true });
+  drawLoot(c, '💎', 1000, 500, 90, 2.4); drawLoot(c, '👑', 780, 520, 90, 1); drawLoot(c, '💰', 1110, 440, 80, 0.5);
+  for (let i = 0; i < 6; i++) drawCoin(c, 640 + i * 70, 590 - (i % 2) * 18, i * 0.7, i % 3 === 0);
+  // title text
+  c.save();
+  c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  const title = (txt, y, a, b, stroke) => {
+    c.font = '400 128px "Lilita One"';
+    c.lineJoin = 'round'; c.lineWidth = 16; c.strokeStyle = stroke; c.strokeText(txt, 60, y);
+    c.fillStyle = stroke; c.fillText(txt, 60, y + 10);
+    const g = c.createLinearGradient(0, y - 110, 0, y); g.addColorStop(0, a); g.addColorStop(1, b); c.fillStyle = g; c.fillText(txt, 60, y);
+  };
+  c.shadowColor = 'rgba(0,0,0,.5)'; c.shadowBlur = 30;
+  title('RACCOON', 220, '#fff5c4', '#ff9f1c', '#3a1d00');
+  title('BANDITS', 345, '#ffd0ea', '#d02f78', '#3a0020');
+  c.shadowBlur = 0;
+  c.font = '900 30px Nunito'; c.fillStyle = '#cfcaf5'; c.fillText('100 HEISTS · ZERO WITNESSES', 66, 405);
+  c.font = '800 24px Nunito'; c.fillStyle = 'rgba(255,214,90,.95)';
+  c.fillText('Sneak past guards · dodge lasers · steal everything', 66, 448);
+  c.restore();
+}
+
+async function post(name, cv, w, h) {
+  let src = cv;
+  if (w) { const o = document.createElement('canvas'); o.width = w; o.height = h || w; const oc = o.getContext('2d'); oc.imageSmoothingQuality = 'high'; oc.drawImage(cv, 0, 0, o.width, o.height); src = o; }
+  await fetch('http://127.0.0.1:5199/', { method: 'POST', body: JSON.stringify({ name, data: src.toDataURL('image/png') }) });
+}
+window.saveAll = async () => {
+  const icon = document.getElementById('icon'), thumb = document.getElementById('thumb');
+  await post('icon-1024.png', icon); await post('icon-512.png', icon, 512); await post('icon-192.png', icon, 192); await post('apple-touch-icon.png', icon, 180); await post('favicon-32.png', icon, 32);
+  await post('thumbnail.png', thumb);
+  return 'saved';
+};
+</script></body></html>

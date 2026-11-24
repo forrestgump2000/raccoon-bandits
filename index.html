@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>Raccoon Bandits</title>
+  <meta name="description" content="Raccoon Bandits — a stealth heist game. Sneak past guards, dodge flashlights and lasers, and pull off 100 wildly different robberies." />
+  <meta name="theme-color" content="#0b0d1e" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta property="og:title" content="Raccoon Bandits" />
+  <meta property="og:description" content="Sneak, steal and escape across 100 unique heists — from banks to the North Pole to an Egyptian underworld." />
+  <meta property="og:image" content="assets/thumbnail.png" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="assets/thumbnail.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="game"></canvas>
+    <canvas id="menu-bg"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-top-left">
+        <div class="hud-level"><span id="hud-lvnum">1</span><div><b id="hud-lvname">Level</b><small id="hud-obj">Steal the loot</small></div></div>
+        <div class="hud-loot" id="hud-loot"></div>
+      </div>
+      <div class="hud-top-right">
+        <div class="hud-coins"><span class="coin-ico"></span><b id="hud-coins">0</b></div>
+        <button class="icon-btn" id="btn-pause" aria-label="Pause">❚❚</button>
+      </div>
+      <canvas id="minimap" width="200" height="150" title="Map (M)"></canvas>
+      <div class="hud-status" id="hud-status"><span id="hud-stealth">Lurking in the shadows</span></div>
+      <div class="alarm-banner hidden" id="alarm-banner">ALARM</div>
+      <div class="gadget-bar" id="gadget-bar"></div>
+    </div>
+
+    <!-- Touch controls -->
+    <div id="touch" class="hidden">
+      <div id="joy-zone"><div id="joy-base"><div id="joy-knob"></div></div></div>
+      <div class="touch-btns">
+        <button id="t-sneak" class="t-btn"><canvas class="tb-cv" data-i="paws" width="80" height="80"></canvas><small>Sneak</small></button>
+        <button id="t-act" class="t-btn big"><canvas class="tb-cv" data-i="hands" width="80" height="80"></canvas><small>Action</small></button>
+      </div>
+    </div>
+
+    <div id="toasts"></div>
+    <div id="intro-card" class="hidden"></div>
+    <div id="bigmap" class="hidden"><canvas id="bigmap-cv" width="900" height="680"></canvas><p>Press M or tap to close</p></div>
+
+    <!-- Title -->
+    <section id="screen-title" class="screen">
+      <div class="title-wrap">
+        <div class="logo">
+          <div class="logo-mask"><canvas id="logo-cv" width="240" height="240"></canvas></div>
+          <h1><span class="l1">RACCOON</span><span class="l2">BANDITS</span></h1>
+          <p class="tag">100 heists. Zero witnesses.</p>
+        </div>
+        <div class="menu-btns">
+          <button class="btn gold xl" id="btn-play">Play</button>
+          <button class="btn" id="btn-levels">Heists</button>
+          <button class="btn" id="btn-shop">Black Market</button>
+          <button class="btn" id="btn-album">Secrets</button>
+          <div class="row">
+            <button class="btn small" id="btn-how">How to play</button>
+            <button class="btn small" id="btn-settings">Settings</button>
+          </div>
+        </div>
+        <div class="title-stats" id="title-stats"></div>
+      </div>
+    </section>
+
+    <!-- Levels -->
+    <section id="screen-levels" class="screen hidden">
+      <header class="scr-head">
+        <button class="btn small back" data-back>Back</button>
+        <h2>Choose your heist</h2>
+        <div class="coins-pill"><span class="coin-ico"></span><b class="coin-count">0</b></div>
+      </header>
+      <div class="chapters" id="chapters"></div>
+      <div class="level-grid" id="level-grid"></div>
+    </section>
+
+    <!-- Shop -->
+    <section id="screen-shop" class="screen hidden">
+      <header class="scr-head">
+        <button class="btn small back" data-back>Back</button>
+        <h2>The Black Market</h2>
+        <div class="coins-pill"><span class="coin-ico"></span><b class="coin-count">0</b></div>
+      </header>
+      <div class="shopkeeper"><span class="sk-face"><canvas id="sk-cv" width="120" height="120"></canvas></span><p id="sk-line">Psst. Got coins? I got gear.</p></div>
+      <div class="tabs" id="shop-tabs"></div>
+      <div class="shop-grid" id="shop-grid"></div>
+    </section>
+
+    <!-- Album -->
+    <section id="screen-album" class="screen hidden">
+      <header class="scr-head">
+        <button class="btn small back" data-back>Back</button>
+        <h2>Secret Collection</h2>
+        <div class="coins-pill" id="egg-count"></div>
+      </header>
+      <p class="album-hint">Every heist hides 3 secret easter eggs in quiet corners. Look for a faint sparkle near walls and dead ends.</p>
+      <div class="album-grid" id="album-grid"></div>
+    </section>
+
+    <div id="modal-wrap" class="hidden"><div id="modal" class="modal"></div></div>
+    <div id="rotate-hint">Rotate for the best view</div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
